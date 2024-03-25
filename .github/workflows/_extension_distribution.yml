@@ -150,12 +150,16 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
           echo "$HOME/.cargo/env" >> $GITHUB_PATH
-          cd delta-kernel-rs
-          cargo build
+          echo "$HOME/.cargo/env"
+          ls $HOME/.cargo/env
+          echo $GITHUB_PATH
 
       - name: Test cargo
         if: ${{ matrix.duckdb_arch == 'linux_amd64_gcc4' }}
         run: |
+          echo "$HOME/.cargo/env"
+          ls $HOME/.cargo/env
+          echo $GITHUB_PATH
           cd delta-kernel-rs
           cargo build
           
