@@ -60,13 +60,22 @@ elseif("${OS_NAME}" STREQUAL "osx")
     endif()
 endif()
 
+if("${USE_RUST_CROSS}")
+    set(RUST_COMMAND "cargo")
+else()
+    set(RUST_COMMAND "cross")
+endif()
+
+# OVerride TODO remove
+set(RUST_COMMAND "cross")
+
 # Add rust_example as a CMake target
 ExternalProject_Add(
         ${KERNEL_NAME}
         DOWNLOAD_COMMAND ""
         CONFIGURE_COMMAND ""
-        BUILD_COMMAND cargo build --package deltakernel-ffi --all-features --target=${RUST_PLATFORM_TARGET}
-        COMMAND cargo build --package deltakernel-ffi --all-features --release --target=${RUST_PLATFORM_TARGET}
+        BUILD_COMMAND ${RUST_COMMAND} build --package deltakernel-ffi --all-features --target=${RUST_PLATFORM_TARGET}
+        COMMAND ${RUST_COMMAND} build --package deltakernel-ffi --all-features --release --target=${RUST_PLATFORM_TARGET}
         BINARY_DIR "${CMAKE_SOURCE_DIR}/../delta-kernel-rs"
         BUILD_BYPRODUCTS "${CMAKE_SOURCE_DIR}/../delta-kernel-rs/target/${RUST_PLATFORM_TARGET}/debug/libdeltakernel_ffi.a"
         BUILD_BYPRODUCTS "${CMAKE_SOURCE_DIR}/../delta-kernel-rs/target/${RUST_PLATFORM_TARGET}/release/libdeltakernel_ffi.a"

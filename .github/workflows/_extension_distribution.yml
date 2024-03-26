@@ -145,6 +145,11 @@ jobs:
         with:
           targets: aarch64-unknown-linux-gnu
 
+      - name: Setup Rust for cross compile
+        if: ${{ matrix.duckdb_arch == 'linux_arm64'}}
+        run: |
+          cargo install cross --git https://github.com/cross-rs/cross
+
       - name: Setup Rust for manylinux (dtolnay/rust-toolchain doesn't work due to curl being old here)
         if: ${{ matrix.duckdb_arch == 'linux_amd64_gcc4' }}
         run: |
