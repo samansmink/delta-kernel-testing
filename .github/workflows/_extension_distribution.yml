@@ -140,7 +140,7 @@ jobs:
           ./duckdb/scripts/setup_manylinux2014.sh general aws-cli ccache ssh python_alias openssl
 
       - name: Setup Rust for cross compile
-        if: ${{ matrix.duckdb_arch == 'linux_arm64' }}
+        if: ${{ matrix.duckdb_arch == 'linux_arm64' || matrix.duckdb_arch == 'linux_amd64' }}
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-unknown-linux-gnu
