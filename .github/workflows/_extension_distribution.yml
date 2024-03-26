@@ -145,7 +145,7 @@ jobs:
         with:
           targets: aarch64-unknown-linux-gnu
 
-      - name: Setup Rust for cross compile
+      - name: Install cross
         if: ${{ matrix.duckdb_arch == 'linux_arm64'}}
         run: |
           cargo install cross --git https://github.com/cross-rs/cross
@@ -185,6 +185,7 @@ jobs:
           CC: ${{ matrix.duckdb_arch == 'linux_arm64' && 'aarch64-linux-gnu-gcc' || '' }}
           CXX: ${{ matrix.duckdb_arch == 'linux_arm64' && 'aarch64-linux-gnu-g++' || '' }}
           RUSTFLAGS: ${{ matrix.duckdb_arch == 'linux_arm64' && '-C linker=aarch64-linux-gnu-gcc' || '' }}
+          CROSS_CONTAINER_IN_CONTAINER: true
           DUCKDB_PLATFORM: ${{ matrix.duckdb_arch }}
         run: |
           make release
