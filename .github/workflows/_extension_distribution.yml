@@ -179,6 +179,7 @@ jobs:
           GEN: ninja
           CC: ${{ matrix.duckdb_arch == 'linux_arm64' && 'aarch64-linux-gnu-gcc' || '' }}
           CXX: ${{ matrix.duckdb_arch == 'linux_arm64' && 'aarch64-linux-gnu-g++' || '' }}
+          RUSTFLAGS: ${{ matrix.duckdb_arch == 'linux_arm64' && '-C linker=aarch64-linux-gnu-gcc' || '' }}
           DUCKDB_PLATFORM: ${{ matrix.duckdb_arch }}
         run: |
           make release
