@@ -63,21 +63,19 @@ protected:
 
 struct DeltaMultiFileReader : public MultiFileReader {
     static unique_ptr<MultiFileReader> CreateInstance();
-    //! Return a DeltaTableSnapshot
-    unique_ptr<MultiFileList> GetFileList(ClientContext &context, const Value &input, const string &name,
-                                          FileGlobOptions options = FileGlobOptions::DISALLOW_EMPTY) override;
+
+    //! Override the regular InitializeFiles; instead of producing a MultiFileList, we want a DeltaTableSnapshot
+    void InitializeFiles(ClientContext &context, const Value &input, const string &name,
+                                          FileGlobOptions options) override;
 
     //! Override the regular parquet bind using the MultiFileReader Bind. The bind from these are what DuckDB's file
     //! readers will try read
-    bool Bind(MultiFileReaderOptions &options, MultiFileList &files,
-              vector<LogicalType> &return_types, vector<string> &names, MultiFileReaderBindData &bind_data) override;
+    bool Bind(vector<LogicalType> &return_types, vector<string> &names, MultiFileReaderBindData &bind_data) override;
 
     //! Override the Options bind. (could be superfluous?) can Bind and BindOptions be the same call?
-    void BindOptions(MultiFileReaderOptions &options, MultiFileList &files,
-                                        vector<LogicalType> &return_types, vector<string> &names, MultiFileReaderBindData& bind_data) override;
+    void BindOptions(vector<LogicalType> &return_types, vector<string> &names, MultiFileReaderBindData& bind_data) override;
 
-    void FinalizeBind(const MultiFileReaderOptions &file_options, const MultiFileReaderBindData &options,
-                                       const string &filename, const vector<string> &local_names,
+    void FinalizeBind(const MultiFileReaderBindData &options, const string &filename, const vector<string> &local_names,
                                        const vector<LogicalType> &global_types, const vector<string> &global_names,
                                        const vector<column_t> &global_column_ids, MultiFileReaderData &reader_data,
                                        ClientContext &context) override;
@@ -86,8 +84,7 @@ struct DeltaMultiFileReader : public MultiFileReader {
                        const MultiFileReaderData &reader_data, DataChunk &chunk, const string &filename) override;
 
     //! Override the ParseOption call to parse delta_scan specific options
-    bool ParseOption(const string &key, const Value &val, MultiFileReaderOptions &options,
-                                        ClientContext &context) override;
+    bool ParseOption(const string &key, const Value &val, ClientContext &context) override;
 };
 
 struct DeltaMultiFileReaderBindData : public CustomMultiFileReaderBindData {

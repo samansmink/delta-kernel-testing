@@ -109,21 +109,19 @@ unique_ptr<MultiFileReader> DeltaMultiFileReader::CreateInstance() {
     return std::move(make_uniq<DeltaMultiFileReader>());
 }
 
-bool DeltaMultiFileReader::Bind(MultiFileReaderOptions &options, MultiFileList &files,
-              vector<LogicalType> &return_types, vector<string> &names, MultiFileReaderBindData &bind_data)  {
-    auto &delta_table_snapshot = dynamic_cast<DeltaTableSnapshot&>(files);
+bool DeltaMultiFileReader::Bind(vector<LogicalType> &return_types, vector<string> &names, MultiFileReaderBindData &bind_data)  {
 
+    auto &delta_table_snapshot = dynamic_cast<DeltaTableSnapshot&>(*files);
     delta_table_snapshot.Bind(return_types, names);
 
     return true;
 };
 
-void DeltaMultiFileReader::BindOptions(MultiFileReaderOptions &options, MultiFileList &files,
-                 vector<LogicalType> &return_types, vector<string> &names, MultiFileReaderBindData& bind_data) {
-    MultiFileReader::BindOptions(options, files, return_types, names, bind_data);
+void DeltaMultiFileReader::BindOptions(vector<LogicalType> &return_types, vector<string> &names, MultiFileReaderBindData& bind_data) {
+    MultiFileReader::BindOptions(return_types, names, bind_data);
 
     //! TODO Hacky asf
-    auto custom_bind_data = make_uniq<DeltaMultiFileReaderBindData>(dynamic_cast<DeltaTableSnapshot&>(files));
+    auto custom_bind_data = make_uniq<DeltaMultiFileReaderBindData>(dynamic_cast<DeltaTableSnapshot&>(*files));
 
     auto demo_gen_col_opt = options.custom_options.find("delta_file_number");
     if (demo_gen_col_opt != options.custom_options.end()) {
@@ -135,12 +133,12 @@ void DeltaMultiFileReader::BindOptions(MultiFileReaderOptions &options, MultiFil
     bind_data.custom_data = std::move(custom_bind_data);
 }
 
-void DeltaMultiFileReader::FinalizeBind(const MultiFileReaderOptions &file_options, const MultiFileReaderBindData &options,
+void DeltaMultiFileReader::FinalizeBind(const MultiFileReaderBindData &options,
                   const string &filename, const vector<string> &local_names,
                   const vector<LogicalType> &global_types, const vector<string> &global_names,
                   const vector<column_t> &global_column_ids, MultiFileReaderData &reader_data,
                   ClientContext &context) {
-    MultiFileReader::FinalizeBind(file_options, options, filename, local_names, global_types, global_names, global_column_ids, reader_data, context);
+    MultiFileReader::FinalizeBind(options, filename, local_names, global_types, global_names, global_column_ids, reader_data, context);
 
 
     // The DeltaMultiFileReader specific finalization
@@ -153,13 +151,13 @@ void DeltaMultiFileReader::FinalizeBind(const MultiFileReaderOptions &file_optio
     }
 }
 
-unique_ptr<MultiFileList> DeltaMultiFileReader::GetFileList(ClientContext &context, const Value &input, const string &name,
+void DeltaMultiFileReader::InitializeFiles(ClientContext &context, const Value &input, const string &name,
                                                        FileGlobOptions options) {
     if (input.type() != LogicalType::VARCHAR) {
         throw BinderException("'delta_scan' only supports single path");
     }
 
-    return make_uniq<DeltaTableSnapshot>(input.GetValue<string>());
+    files = make_uniq<DeltaTableSnapshot>(input.GetValue<string>());
 }
 
 void DeltaMultiFileReader::FinalizeChunk(ClientContext &context, const MultiFileReaderBindData &bind_data,
@@ -195,7 +193,7 @@ void DeltaMultiFileReader::FinalizeChunk(ClientContext &context, const MultiFile
     }
 };
 
-bool DeltaMultiFileReader::ParseOption(const string &key, const Value &val, MultiFileReaderOptions &options, ClientContext &context) {
+bool DeltaMultiFileReader::ParseOption(const string &key, const Value &val, ClientContext &context) {
     auto loption = StringUtil::Lower(key);
 
     if (loption == "delta_file_number") {
@@ -203,7 +201,7 @@ bool DeltaMultiFileReader::ParseOption(const string &key, const Value &val, Mult
         return true;
     }
 
-    return MultiFileReader::ParseOption(key, val, options, context);
+    return MultiFileReader::ParseOption(key, val, context);
 }
 
 DeltaMultiFileReaderBindData::DeltaMultiFileReaderBindData(DeltaTableSnapshot & delta_table_snapshot): current_snapshot(delta_table_snapshot){
