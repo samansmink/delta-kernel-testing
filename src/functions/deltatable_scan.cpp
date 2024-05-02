@@ -28,7 +28,7 @@ static void* allocate_string(const struct ffi::KernelStringSlice slice) {
     return new string(slice.ptr, slice.len);
 }
 
-static void visit_callback(void* engine_context, const struct ffi::KernelStringSlice path, int64_t size, ffi::CDvInfo *dv_info, struct ffi::CStringMap *partition_values) {
+static void visit_callback(void* engine_context, const struct ffi::KernelStringSlice path, int64_t size, const ffi::DvInfo *dv_info, struct ffi::CStringMap *partition_values) {
     auto context = (DeltaTableSnapshot *) engine_context;
     auto path_string =  context->path + "/" + from_delta_string_slice(path);
 
@@ -45,7 +45,8 @@ static void visit_callback(void* engine_context, const struct ffi::KernelStringS
     context->metadata[path_string].file_number = context->resolved_files.size() - 1;
 
     // Fetch the deletion vector
-    ffi::KernelBoolSlice *selection_vector = ffi::selection_vector_from_dv(dv_info, context->table_client, context->global_state);
+    auto selection_vector_res = ffi::selection_vector_from_dv(dv_info, context->table_client, context->global_state);
+    auto selection_vector = unpack_result_or_throw(selection_vector_res, "selection_vector_from_dv for path " + context->path);
     if (selection_vector) {
         context->metadata[path_string].selection_vector = {selection_vector, ffi::drop_bool_slice};
     }

@@ -56,7 +56,7 @@ public:
     ffi::Scan* scan;
     ffi::GlobalScanState *global_state;
     UniqueKernelPointer <ffi::KernelScanDataIterator> scan_data_iterator;
-    UniqueKernelPointer <ffi::KernelScanFileIterator> files; // Deprecated
+//    UniqueKernelPointer <ffi::KernelScanFileIterator> files; // Deprecated
 
     //! Names
     vector<string> names;
