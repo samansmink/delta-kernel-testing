@@ -166,13 +166,13 @@ string DeltaTableSnapshot::GetFile(idx_t i) {
 
         auto have_scan_data_res = ffi::kernel_scan_data_next(scan_data_iterator.get(), this, visit_data);
 
-        // TODO: weird workaround required to not get "Json error: Encountered unexpected 'c' whilst parsing value"
-        if (have_scan_data_res.tag == ffi::ExternResult<bool>::Tag::Err) {
-            if (have_scan_data_res.err._0) {
-                files_exhausted = true;
-                return "";
-            }
-        }
+//        // TODO: weird workaround required to not get "Json error: Encountered unexpected 'c' whilst parsing value"
+//        if (have_scan_data_res.tag == ffi::ExternResult<bool>::Tag::Err) {
+//            if (have_scan_data_res.err._0) {
+//                files_exhausted = true;
+//                return "";
+//            }
+//        }
 
         auto have_scan_data = unpack_result_or_throw(have_scan_data_res, "kernel_scan_data_next in DeltaTableSnapshot GetFile");
 
