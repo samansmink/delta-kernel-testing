@@ -20,8 +20,16 @@ public:
                 .make_field_list = (uintptr_t (*)(void*, uintptr_t)) &MakeFieldList,
                 .visit_struct = (void (*)(void*, uintptr_t, ffi::KernelStringSlice, uintptr_t)) &VisitStruct,
                 .visit_string = VisitSimpleType<LogicalType::VARCHAR>(),
-                .visit_integer = VisitSimpleType<LogicalType::INTEGER>(),
                 .visit_long = VisitSimpleType<LogicalType::BIGINT>(),
+                .visit_integer = VisitSimpleType<LogicalType::SMALLINT>(),
+                .visit_byte = VisitSimpleType<LogicalType::TINYINT>(),
+                .visit_float = VisitSimpleType<LogicalType::FLOAT>(),
+                .visit_double = VisitSimpleType<LogicalType::DOUBLE>(),
+                .visit_boolean = VisitSimpleType<LogicalType::BOOLEAN>(),
+                .visit_binary = VisitSimpleType<LogicalType::VARCHAR>(), // TODO: check
+                .visit_date = VisitSimpleType<LogicalType::DATE>(), // TODO: check
+                .visit_timestamp = VisitSimpleType<LogicalType::TIMESTAMP>(), // TODO: check
+                .visit_timestamp_ntz = VisitSimpleType<LogicalType::TIMESTAMP_TZ>() // TODO: check
         };
         uintptr_t result = visit_schema(snapshot, &visitor);
         return state.TakeFieldList(result);
